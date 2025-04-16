@@ -206,13 +206,13 @@ Follow the same process as Task 3:
 ### 🔹 Subtask 4.1: `project_condition(rc, years)`
 
 Takes a `RegionCondition` and a number of years.  
-Returns a **new RegionCondition** representing the projected state of the region after the given number of years.
+Returns a **new `RegionCondition`** representing the projected state of the region after the given number of years.
 
 #### Rules:
-- Population grows exponentially based on the terrain type’s growth rate
-- Use p*e^(rt) continous growth equation
-- Emissions scale proportionally with population
-- The region and terrain stay the same
+- Population updates annually based on the terrain type’s growth rate  
+- Apply the growth rate once per year, compounding over time  
+- Emissions scale proportionally with the updated population  
+- The region and terrain stay the same  
 - The `year` field increases by `years`
 
 | Terrain     | Annual Growth Rate |
@@ -224,6 +224,7 @@ Returns a **new RegionCondition** representing the projected state of the region
 
 > You are encouraged to define **helper functions** for population growth, emissions scaling, etc.  
 > Do **not mutate** the original `RegionCondition` — return a new one.
+
 
 ---
 
