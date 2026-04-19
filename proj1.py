@@ -2,12 +2,20 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class GlobeRect:
-    pass
+    lo_lat: float
+    hi_lat: float
+    west_long: float
+    east_long: float
 
 @dataclass(frozen=True)
 class Region:
-    pass
+    rect: GlobeRect
+    name: str
+    terrain: str
 
 @dataclass(frozen=True)
 class RegionCondition:
-    pass
+    region: Region
+    year: int
+    pop: int
+    ghg_rate: float
