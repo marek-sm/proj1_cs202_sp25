@@ -1,6 +1,12 @@
 #complete your tasks in this file
+import sys
+import math
+from typing import *
 from dataclasses import dataclass
 
+sys.setrecursionlimit(10**6)
+
+# Task 1
 @dataclass(frozen=True)
 class GlobeRect:
     lo_lat: float
@@ -21,6 +27,7 @@ class RegionCondition:
     pop: int
     ghg_rate: float
 
+# Task 2
 nyc_globerect: GlobeRect = GlobeRect(40.5, 41.0, -74.3, -73.4)
 nyc_region: Region = Region(nyc_globerect, "New York City", "other")
 nyc_region_condition: RegionCondition = RegionCondition(nyc_region, 2020, 20_100_000, 200_000_000.0)
@@ -38,3 +45,52 @@ cal_poly_region: Region = Region(cal_poly_globerect, "Cal Poly", "other")
 cal_poly_region_condition: RegionCondition = RegionCondition(cal_poly_region, 2020, 55_000, 400_000.0)
 
 region_conditions: list[RegionCondition] = [nyc_region_condition, joburg_region_condition, gulf_of_mexico_region_condition, cal_poly_region_condition]
+
+# Task 3
+def emissions_per_capita(rc: RegionCondition) -> float:
+    # Returns the tons of CO2-equivalent emitted per person in the region per year, given a RegionCondition
+
+    if not isinstance(rc, RegionCondition):
+        raise TypeError("rc must be a RegionCondition")
+    if rc.pop < 0 or rc.ghg_rate < 0:
+        raise ValueError("population and ghg rate must both be at least 0")
+    if rc.pop == 0:
+        return 0.0
+
+    return rc.ghg_rate / rc.pop
+
+def area(gr: GlobeRect) -> float:
+    # Returns the estimated surface area of the region in square kilometers, given a GlobeRect
+    
+    if not isinstance(gr, GlobeRect):
+        raise TypeError("gr must be a GlobeRect")
+    
+    long_diff: float = gr.east_long - gr.west_long
+    if long_diff < 0:
+        long_diff += 360
+    long_diff_radians: float = math.radians(long_diff)
+
+    lo_lat_radians: float = math.radians(gr.lo_lat)
+    hi_lat_radians: float = math.radians(gr.hi_lat)
+    
+    R: float = 6378.1
+
+    return R ** 2 * long_diff_radians * abs(math.sin(lo_lat_radians) - math.sin(hi_lat_radians))
+
+def emissions_per_square_km(rc: RegionCondition) -> float:
+    # Returns the tons of CO2-equivalent per square kilometer, given a RegionCondition
+    
+    if not isinstance(rc, RegionCondition):
+        raise TypeError("rc must be a RegionCondition")
+    if rc.ghg_rate < 0:
+        raise ValueError("ghg rate must be at least 0")
+    
+    size: float = area(rc.region.rect)
+    if size == 0:
+        return 0.0
+    
+    return rc.ghg_rate / size
+
+def densest(rc_list: list[RegionCondition]) -> str:
+    # Returns the name of the region with the highest population density, given a list of RegionCondition values
+    pass
