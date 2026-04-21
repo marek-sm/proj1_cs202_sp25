@@ -93,4 +93,24 @@ def emissions_per_square_km(rc: RegionCondition) -> float:
 
 def densest(rc_list: list[RegionCondition]) -> str:
     # Returns the name of the region with the highest population density, given a list of RegionCondition values
-    pass
+    if not isinstance(rc_list, list):
+        raise TypeError("Not a list of RegionCondition objects")
+    if not rc_list:
+        raise ValueError("List cannot be empty")
+    
+    def _helper_densest(rc_list: List[RegionCondition]) -> RegionCondition:
+        head: RegionCondition = rc_list[0]
+        if head.pop < 0:
+            raise ValueError("Population must be at least 0")
+        if len(rc_list) == 1:
+            return head
+        tail_winner: RegionCondition = _helper_densest(rc_list[1:])
+        head_area: float = area(head.region.rect)
+        tail_area: float = area(tail_winner.region.rect)
+        head_density: float = head.pop / head_area if head_area > 0 else 0.0
+        tail_density: float = tail_winner.pop / tail_area if tail_area > 0 else 0.0
+        if head_density >= tail_density:
+            return head
+        return tail_winner
+    
+    return _helper_densest(rc_list).region.name

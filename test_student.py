@@ -7,30 +7,21 @@ from proj1 import *
 class TestRegionFunctions(unittest.TestCase):
 
     def setUp(self):
-        # Basic globerect/region/region_condition
-        self.sydney_globerect: GlobeRect = GlobeRect(-34.1, -33.6, 150.5, 151.3)
-        sydney_region: Region = Region(self.sydney_globerect, "Sydney", "other")
-        self.sydney_region_condition: RegionCondition = RegionCondition(sydney_region, 2020, 5_300_000, 25_000_000.0)
-
-        # Zero population region_condition
-        caribbean_sea_globerect: GlobeRect = GlobeRect(9, 22, -89, -60)
-        caribbean_sea_region: Region = Region(caribbean_sea_globerect, "Caribbean Sea", "ocean")
-        self.caribbean_sea_region_condition: RegionCondition = RegionCondition(caribbean_sea_region, 2026, 0, 0.0)
-
-        # Negative population / ghg_rate
+        # Negative population
         invalid_pop_globerect: GlobeRect = GlobeRect(5, 10, -5, -10)
         invalid_pop_region: Region = Region(invalid_pop_globerect, "Invalid Population", "other")
         self.invalid_pop_region_condition: RegionCondition = RegionCondition(invalid_pop_region, 2026, -5_000, 1_984.4)
 
+        # Negative GHG rate
         invalid_ghg_globerect: GlobeRect = GlobeRect(5, 10, -5, -10)
         invalid_ghg_region: Region = Region(invalid_ghg_globerect, "Invalid GHG Rate", "other")
         self.invalid_ghg_region_condition: RegionCondition = RegionCondition(invalid_ghg_region, 2026, 7_500, -768.4)
 
     def test_emissions_per_capita_basic(self) -> None:
-        self.assertAlmostEqual(emissions_per_capita(self.sydney_region_condition), 4.7170, places=4)
+        self.assertAlmostEqual(emissions_per_capita(nyc_region_condition), 9.9502, places=4)
 
     def test_emissions_per_capita_zero_pop(self) -> None:
-        self.assertEqual(emissions_per_capita(self.caribbean_sea_region_condition), 0.0)
+        self.assertEqual(emissions_per_capita(gulf_of_mexico_region_condition), 0.0)
 
     def test_emissions_per_capita_wrong_type(self) -> None:
         with self.assertRaises(TypeError):
@@ -43,7 +34,7 @@ class TestRegionFunctions(unittest.TestCase):
             emissions_per_capita(self.invalid_ghg_region_condition)
 
     def test_area_basic(self) -> None:
-        self.assertAlmostEqual(area(self.sydney_globerect), 4116.5647, places=4)
+        self.assertAlmostEqual(area(joburg_globerect), 1778.9920, places=4)
 
     def test_area_wrap_around(self) -> None:
         gr: GlobeRect = GlobeRect(0, 10, 170, -170)
@@ -68,11 +59,16 @@ class TestRegionFunctions(unittest.TestCase):
         with self.assertRaises(TypeError):
             area("Not a GlobeRect")
 
+    def test_area_reversed_latitude(self) -> None:
+        normal: float = area(GlobeRect(10, 20, 0, 10))
+        reversed: float = area(GlobeRect(20, 10, 0, 10))
+        self.assertAlmostEqual(normal, reversed, places=4)
+
     def test_emissions_per_square_km_basic(self) -> None:
-        self.assertAlmostEqual(emissions_per_square_km(self.sydney_region_condition), 6073.0249, places=4)
+        self.assertAlmostEqual(emissions_per_square_km(cal_poly_region_condition), 112.9339, places=4)
 
     def test_emissions_per_square_km_zero_ghg(self) -> None:
-        self.assertEqual(emissions_per_square_km(self.caribbean_sea_region_condition), 0.0)
+        self.assertEqual(emissions_per_square_km(gulf_of_mexico_region_condition), 0.0)
 
     def test_emissions_per_square_km_wrong_type(self) -> None:
         with self.assertRaises(TypeError):
@@ -82,9 +78,23 @@ class TestRegionFunctions(unittest.TestCase):
         with self.assertRaises(ValueError):
             emissions_per_square_km(self.invalid_ghg_region_condition)
 
-    def test_densest(self) -> None:
-        pass
+    def test_densest_basic(self) -> None:
+        self.assertEqual(densest(region_conditions), "New York City")
 
+    def test_densest_empty_list(self) -> None:
+        with self.assertRaises(ValueError):
+            densest([])
+
+    def test_densest_wrong_type(self) -> None:
+        with self.assertRaises(TypeError):
+            densest("Not a list of RegionCondition")
+
+    def test_densest_negative_population(self) -> None:
+        with self.assertRaises(ValueError):
+            densest([self.invalid_pop_region_condition])
+
+    def test_densest_winner_not_first(self) -> None:
+        self.assertEqual(densest([cal_poly_region_condition, nyc_region_condition]), "New York City")
 
 if __name__ == '__main__':
     unittest.main()
