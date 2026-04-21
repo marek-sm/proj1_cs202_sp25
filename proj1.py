@@ -101,7 +101,6 @@ def densest(rc_list: list[RegionCondition]) -> str:
     def _helper_density(rc: RegionCondition) -> float:
          # Returns the population density (people per square km) of the given RegionCondition, or 0.0 if the region has zero area
         a: float = area(rc.region.rect)
-        a: float = area(rc.region.rect)
         return rc.pop / a if a > 0 else 0.0 
     
     def _helper_densest(rc_list: List[RegionCondition], i: int, best: RegionCondition, best_density: float) -> RegionCondition:
