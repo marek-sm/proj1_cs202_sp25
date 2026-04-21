@@ -98,23 +98,28 @@ def densest(rc_list: list[RegionCondition]) -> str:
     if not rc_list:
         raise ValueError("List cannot be empty")
     
-    def _helper_densest(rc_list: List[RegionCondition]) -> RegionCondition:
-        # Returns the RegionCondition with the highest population density from a non-empty list of RegionCondition values
-        head: RegionCondition = rc_list[0]
-        if head.pop < 0:
-            raise ValueError("Population must be at least 0")
-        if len(rc_list) == 1:
-            return head
-        tail_winner: RegionCondition = _helper_densest(rc_list[1:])
-        head_area: float = area(head.region.rect)
-        tail_area: float = area(tail_winner.region.rect)
-        head_density: float = head.pop / head_area if head_area > 0 else 0.0
-        tail_density: float = tail_winner.pop / tail_area if tail_area > 0 else 0.0
-        if head_density >= tail_density:
-            return head
-        return tail_winner
+    def _helper_density(rc: RegionCondition) -> float:
+         # Returns the population density (people per square km) of the given RegionCondition, or 0.0 if the region has zero area
+        a: float = area(rc.region.rect)
+        a: float = area(rc.region.rect)
+        return rc.pop / a if a > 0 else 0.0 
     
-    return _helper_densest(rc_list).region.name
+    def _helper_densest(rc_list: List[RegionCondition], i: int, best: RegionCondition, best_density: float) -> RegionCondition:
+        # Returns the densest RegionCondition in rc_list starting at index i, given the densest RegionCondition seen so far and its density
+        if i == len(rc_list):
+            return best
+        current: RegionCondition = rc_list[i]
+        if current.pop < 0:
+            raise ValueError("Population cannot be negative")
+        current_density: float = _helper_density(current)
+        if current_density > best_density:
+            return _helper_densest(rc_list, i + 1, current, current_density)
+        return _helper_densest(rc_list, i + 1, best, best_density)
+    
+    first: RegionCondition = rc_list[0]
+    if first.pop < 0:
+        raise ValueError("Population cannot be negative")
+    return _helper_densest(rc_list, 1, first, _helper_density(first)).region.name
 
 # Task 4
 def project_condition(rc: RegionCondition, years: int) -> RegionCondition:
