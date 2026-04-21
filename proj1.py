@@ -99,6 +99,7 @@ def densest(rc_list: list[RegionCondition]) -> str:
         raise ValueError("List cannot be empty")
     
     def _helper_densest(rc_list: List[RegionCondition]) -> RegionCondition:
+        # Returns the RegionCondition with the highest population density from a non-empty list of RegionCondition values
         head: RegionCondition = rc_list[0]
         if head.pop < 0:
             raise ValueError("Population must be at least 0")
@@ -121,7 +122,7 @@ def project_condition(rc: RegionCondition, years: int) -> RegionCondition:
     TERRAIN_GROWTH_RATES: dict[str, float] = {"ocean": 0.0001, "mountains": 0.0005, "forest": -0.00001, "other": 0.0003}
 
     def _helper_grow_population(pop: float, rate: float, years: int) -> float:
-    # Returns the compounded population after a certain amount of years at a certain annual rate.
+        # Returns the compounded population after a certain amount of years at a certain annual rate
         if years == 0:
             return pop
         return _helper_grow_population(pop * (1 + rate), rate, years - 1)
