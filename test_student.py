@@ -96,5 +96,40 @@ class TestRegionFunctions(unittest.TestCase):
     def test_densest_winner_not_first(self) -> None:
         self.assertEqual(densest([cal_poly_region_condition, nyc_region_condition]), "New York City")
 
+    def test_project_condition_basic(self) -> None:
+        projected: RegionCondition = project_condition(cal_poly_region_condition, 10)
+        self.assertEqual(projected.year, 2030)
+        self.assertEqual(projected.pop, 55165)
+        self.assertAlmostEqual(projected.ghg_rate, 401201.6213, places=4)
+        self.assertEqual(projected.region, cal_poly_region_condition.region)
+
+    def test_project_condition_zero_years(self) -> None:
+        projected: RegionCondition = project_condition(cal_poly_region_condition, 0)
+        self.assertEqual(projected.pop, cal_poly_region_condition.pop)
+        self.assertEqual(projected.ghg_rate, cal_poly_region_condition.ghg_rate)
+        self.assertEqual(projected.year, cal_poly_region_condition.year)
+
+    def test_project_condition_no_mutation(self) -> None:
+        original_pop: int = cal_poly_region_condition.pop
+        original_year: int = cal_poly_region_condition.year
+        project_condition(cal_poly_region_condition, 50)
+        self.assertEqual(cal_poly_region_condition.pop, original_pop)
+        self.assertEqual(cal_poly_region_condition.year, original_year)
+
+    def test_project_condition_forest_shrinks(self) -> None:
+        forest_gr: GlobeRect = GlobeRect(40, 41, 0, 1)
+        forest_region: Region = Region(forest_gr, "Test Forest", "forest")
+        forest_rc: RegionCondition = RegionCondition(forest_region, 2020, 1_000_000, 5_000.0)
+        projected: RegionCondition = project_condition(forest_rc, 100)
+        self.assertLess(projected.pop, forest_rc.pop)
+
+    def test_project_condition_wrong_type(self) -> None:
+        with self.assertRaises(TypeError):
+            project_condition("Not a RegionCondition", 50)
+
+    def test_project_condition_negative_years(self) -> None:
+        with self.assertRaises(ValueError):
+            project_condition(cal_poly_region_condition, -67)
+
 if __name__ == '__main__':
     unittest.main()

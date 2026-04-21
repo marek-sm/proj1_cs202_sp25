@@ -114,3 +114,36 @@ def densest(rc_list: list[RegionCondition]) -> str:
         return tail_winner
     
     return _helper_densest(rc_list).region.name
+
+# Task 4
+def project_condition(rc: RegionCondition, years: int) -> RegionCondition:
+    # Returns a RegionCondition projected into the future by the given number of years, assuming a constant population growth rate and a constant GHG emissions growth rate
+    TERRAIN_GROWTH_RATES: dict[str, float] = {"ocean": 0.0001, "mountains": 0.0005, "forest": -0.00001, "other": 0.0003}
+
+    def _helper_grow_population(pop: float, rate: float, years: int) -> float:
+    # Returns the compounded population after a certain amount of years at a certain annual rate.
+        if years == 0:
+            return pop
+        return _helper_grow_population(pop * (1 + rate), rate, years - 1)
+
+    if not isinstance(rc, RegionCondition):
+        raise TypeError("rc has to be a RegionCondition object")
+    if not isinstance(years, int) or isinstance(years, bool):
+        raise TypeError("years has to be an int")
+    if years < 0:
+        raise ValueError("years has to be non-negative")
+    if rc.pop < 0 or rc.ghg_rate < 0:
+        raise ValueError("Population and ghg rate must both be at least 0")
+    if rc.region.terrain not in TERRAIN_GROWTH_RATES:
+        raise ValueError(f"terrain must be one of {set(TERRAIN_GROWTH_RATES)}")
+    
+    rate: float = TERRAIN_GROWTH_RATES[rc.region.terrain]
+    new_pop_float: float = _helper_grow_population(float(rc.pop), rate, years)
+    new_pop: int = round(new_pop_float)
+    
+    if rc.pop == 0:
+        new_ghg: float = 0.0
+    else:
+        new_ghg = rc.ghg_rate * (new_pop_float / rc.pop)
+    
+    return RegionCondition(rc.region, rc.year + years, new_pop, new_ghg)
